@@ -34,14 +34,17 @@ Implemented a fixed-size, thread-safe queue that supports:
 ### 🛠 Mechanisms Used
 - `pthread_mutex_t`: Ensures mutual exclusion when accessing the queue.
 - `pthread_cond_t`: Used to wait for or signal conditions (`not_empty`, `not_full`).
+- **C++:** `pthread_mutex_t`, `pthread_cond_t`
+- **Go:** `sync.Mutex`, `sync.Cond`
 
 ### 💡 Key Features
 - Circular buffer implementation.
 - Supports multiple producers and consumers.
 - Proper signaling to avoid busy waiting.
 
-### 📁 File
+### 📁 Files
 `queue_pthread.cpp`
+`queue.go`
 
 ---
 
@@ -57,14 +60,17 @@ Implemented the classic bounded-buffer problem:
 - `sem_t empty`: Counts available slots in the buffer.
 - `sem_t full`: Counts filled slots.
 - `pthread_mutex_t mutex`: Ensures exclusive access to buffer indexes.
+- **C++:** `sem_t empty`, `sem_t full`, `pthread_mutex_t mutex`
+- **Go:** Buffered/unbuffered channels for semaphores, `sync.Mutex`
 
 ### 💡 Key Features
 - Producers wait if the buffer is full (`sem_wait(&empty)`).
 - Consumers wait if the buffer is empty (`sem_wait(&full)`).
 - Mutex ensures race-free access to the buffer.
 
-### 📁 File
+### 📁 Files
 `producer_consumer.cpp`
+`producer_consumer.go`
 
 ---
 
@@ -79,19 +85,23 @@ Implemented the Dining Philosophers problem ensuring:
 - `pthread_mutex_t forks[5]`: One mutex per fork.
 - `sem_t max_eaters`: Limits the number of concurrent eating philosophers to N-1 (4), preventing deadlock.
 - `pthread_mutex_t print_lock`: Ensures safe, readable console output.
+- **C++:** `pthread_mutex_t forks[5]`, `sem_t max_eaters`, `pthread_mutex_t print_lock`
+- **Go:** Array de `sync.Mutex` para tenedores, canal con capacidad N-1 para limitar filósofos comiendo, `sync.Mutex` para impresión
 
 ### 💡 Key Features
 - Philosophers alternate between thinking and eating.
 - Global semaphore enforces a concurrency constraint to break circular wait.
 - Print output is synchronized for clarity.
 
-### 📁 File
+### 📁 Files
 `dining_philosophers.cpp`
+`dining_philosophers.go`
 
 ---
 
 ## ▶️ How to Compile and Run
 
+### C++
 ```bash
 # Task 1
 g++ -pthread queue_pthread.cpp -o queue_pthread.x
@@ -104,6 +114,18 @@ g++ -pthread producer_consumer.cpp -o producer_consumer.x
 # Task 3
 g++ -pthread dining_philosophers.cpp -o dining_philosophers
 ./dining_philosophers.x
+```
+
+### Go
+```bash
+# Task 1
+go run queue.go
+
+# Task 2
+go run producer_consumer.go
+
+# Task 3
+go run dining_philosophers.go
 ```
 
 ---
@@ -121,6 +143,19 @@ g++ -pthread dining_philosophers.cpp -o dining_philosophers
 ## 🧪 Example Outputs
 
 ### 🔹 Task 1: Thread-Safe Queue
+
+**C++**
+```
+Enqueued: 0
+Enqueued: 100
+Dequeued: 0
+Consumer 0 processed item: 0
+Dequeued: 100
+Consumer 1 processed item: 100
+...
+```
+
+**Go**
 ```
 Enqueued: 0
 Enqueued: 100
@@ -132,6 +167,17 @@ Consumer 1 processed item: 100
 ```
 
 ### 🔹 Task 2: Producer-Consumer with Semaphores
+
+**C++**
+```
+Producer 0 produced item: 0
+Producer 1 produced item: 100
+Consumer 0 consumed item: 0
+Consumer 1 consumed item: 100
+...
+```
+
+**Go**
 ```
 Producer 0 produced item: 0
 Producer 1 produced item: 100
@@ -141,6 +187,8 @@ Consumer 1 consumed item: 100
 ```
 
 ### 🔹 Task 3: Dining Philosophers (Deadlock-Free)
+
+**C++**
 ```
 Philosopher 0 is thinking.
 Philosopher 1 is thinking.
@@ -151,6 +199,19 @@ Philosopher 0 is thinking.
 Philosopher 2 is eating.
 ...
 Philosopher 4 is done eating.
+```
+
+**Go**
+```
+Philosopher 0 is thinking
+Philosopher 1 is thinking
+Philosopher 2 is thinking
+Philosopher 0 is eating
+Philosopher 1 is eating
+Philosopher 0 finished eating
+Philosopher 2 is eating
+...
+Philosopher 4 finished eating
 ```
 
 ---
